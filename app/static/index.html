@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+</head>
+
+<body>
+    <div id="app" class="container">
+        <div class="row mt-3">
+            <form @submit.prevent="submit()">
+                <div class="mb-3 col-12">
+                    <label class="form-label" for="id">Id</label>
+                    <input id="id" class="form-control form-control-sm" v-model="user.id" />
+                    <span v-if="errors.id" class="text-danger">{{ errors.id }}</span>
+                </div>
+                <div class="mb-3 col-12">
+                    <label class="form-label" for="name">Name</label>
+                    <input id="name" class="form-control form-control-sm" v-model="user.name" />
+                    <span v-if="errors.name" class="text-danger">{{ errors.name }}</span>
+                </div>
+                <div class="mb-3 col-12">
+                    <label class="form-label" for="email">Email</label>
+                    <input id="email" class="form-control form-control-sm" v-model="user.email" />
+                    <span v-if="errors.email" class="text-danger">{{ errors.email }}</span>
+                </div>
+                <div class="mb-3 col-12">
+                    <label class="form-label" for="age">Age</label>
+                    <input id="age" class="form-control form-control-sm" v-model="user.age" />
+                    <span v-if="errors.age" class="text-danger">{{ errors.age }}</span>
+                </div>
+                <div class="mb-3 col-12">
+                    <label class="form-label" for="birthdate">Birth Date</label>
+                    <input id="birthdate" class="form-control form-control-sm" v-model="user.birthdate" />
+                    <span v-if="errors.birthdate" class="text-danger">{{ errors.birthdate }}</span>
+                </div>
+                <div class="col-12">
+                    <input type="button" class="btn btn-sm btn-danger" @click="fill(0)" value="Fill invaid data" />
+                    <input type="button" class="btn btn-sm btn-success ms-1" @click="fill(1)" value="Fill vaid data" />
+                    <button class="btn btn-sm btn-primary ms-1">Submit</button>
+                </div>
+                <div v-if="pass" class="alert alert-success mt-3">
+                    Validation success!
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        const { createApp } = Vue
+        createApp({
+            data() {
+                return {
+                    user: {},
+                    errors: {},
+                    pass: false
+                }
+            },
+            methods: {
+                fill(valid) {
+                    this.user.id = (valid ? '1' : undefined)
+                    this.user.name = (valid ? 'foo' : 'my name is foo')
+                    this.user.email = (valid ? 'foo@mail.com' : 'mail')
+                    this.user.age = (valid ? '10' : '101')
+                    this.user.birthdate = (valid ? '2000-01-01' : '01012000')
+                },
+                submit() {
+                    fetch('/submit', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(this.user)
+                    }).then(res => {
+                        if (res.status == 200) {
+                            this.pass = true
+                            this.errors = {}
+                        }
+                        else {
+                            res.json().then(err => {
+                                this.pass = false
+                                this.errors = err
+                            })
+                        }
+                    })
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
